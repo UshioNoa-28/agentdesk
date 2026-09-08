@@ -1,0 +1,14 @@
+mcp_servers:
+  - id: exa-search
+    enabled: ${EXA_MCP_ENABLED:-true}
+    description: >-
+      Searches the public web using Exa for current information, documentation,
+      recent facts, source discovery, and relevant webpage content. Route requests
+      here when an answer depends on external web research rather than the local
+      AgentDesk knowledge base. It does not inspect local files, execute code,
+      or modify the workspace.
+    transport: streamable-http
+    url: https://mcp.exa.ai/mcp
+    headers:
+      x-api-key: "${EXA_API_KEY:-}"
+    timeout_seconds: 120

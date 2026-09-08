@@ -1,0 +1,106 @@
+x-python-runtime: &python-runtime
+  build:
+    context: .
+    args:
+      PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}
+  image: anna-agent-runtime:latest
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: agentdesk
+      POSTGRES_USER: agent
+      POSTGRES_PASSWORD: agent
+    volumes:
+      - agentdesk_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agent -d agentdesk"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  qdrant:
+    image: qdrant/qdrant:v1.13.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6333:6333"
+      - "127.0.0.1:6334:6334"
+    volumes:
+      - agentdesk_qdrant:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/6333'"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  agent:
+    <<: *python-runtime
+    command: uvicorn agent.main:app --host 0.0.0.0 --port 8000
+    env_file:
+      - path: ./config/env/context.env
+        required: false
+      - path: ./config/env/model.env
+        required: false
+      - path: ./config/env/agent.env
+        required: false
+      - path: ./config/env/memory.env
+        required: false
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://agent:agent@postgres:5432/agentdesk}
+      QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
+      PROVIDER_WIRE_LOG_PATH: ${PROVIDER_WIRE_LOG_PATH:-/var/log/anna/model-provider-http.log}
+      HTTP_WIRE_LOG_PATH: ${HTTP_WIRE_LOG_PATH:-/var/log/anna/agent-http.log}
+      MEMORY_LOG_PATH: ${MEMORY_LOG_PATH:-/var/log/anna/memory.log}
+    extra_hosts:
+      # 允许 Agent 访问宿主机上运行的 Ollama 或本地 Embedding/LLM 服务。
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./logs:/var/log/anna
+      - ./skills:/app/skills:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${AGENT_PORT:-8000}:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  health-monitor:
+    <<: *python-runtime
+    command: python -m health_monitor.main
+    environment:
+      DATABASE_URL: postgresql+asyncpg://agent:agent@postgres:5432/agentdesk
+      AGENT_HEALTH_URL: http://agent:8000/api/health
+    depends_on:
+      postgres:
+        condition: service_healthy
+      agent:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/livez')",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  agentdesk_postgres:
+  agentdesk_qdrant:

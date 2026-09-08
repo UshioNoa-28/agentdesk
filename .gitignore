@@ -1,0 +1,74 @@
+# Python Bytecode & Builds
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments & Package Managers
+.venv/
+env/
+venv/
+ENV/
+.uv/
+.cache/
+uv.lock
+
+# IDE & Editors
+.vscode/
+.idea/
+.codex/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing & Coverage
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+
+# Environment & Secret Configs
+.env
+.env.local
+.env.*
+!.env.example
+config/env/*.env
+config/env/*.env.local
+!config/env/*.env.example
+
+# Local Data & Logs
+data/
+logs/
+*.log
+*_dialogue.json
+
+# Scratch, Internal Notes & Docs
+example/
+plan.md
+todo
+.claude/
+AGENTS.md
+Agent.md
+opencode.json
+docs/
+image*.png

@@ -1,0 +1,17 @@
+.env
+.env.local
+.env.*
+config/env/*.env
+config/env/*.env.local
+.git
+.venv
+__pycache__
+*.py[cod]
+.pytest_cache
+.ruff_cache
+build
+anna_agent.egg-info
+data
+logs
+cli/node_modules
+cli/.test-dist

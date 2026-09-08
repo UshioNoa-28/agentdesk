@@ -1,0 +1,19 @@
+# Skill 元数据由配置显式登记；name、description 和 file_path 都是必填项。
+# file_path 相对于 Agent 进程当前工作目录，也可以填写绝对路径。
+skills:
+  - name: structured-answer
+    description: >-
+      Organize explanations into a direct conclusion, supporting evidence, and
+      explicit uncertainty or limitations.
+    file_path: skills/structured-answer/SKILL.md
+    enabled: true
+
+# 防止误把大型文件加载进模型上下文。
+max_file_bytes: 262144
+
+# 示例：
+# skills:
+#   - name: scientific-writing
+#     description: Improve academic writing and reviewer-facing structure.
+#     file_path: skills/scientific-writing/SKILL.md
+#     enabled: true
