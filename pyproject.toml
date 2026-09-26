@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "anna-agent"
+version = "0.1.0"
+description = "AgentDesk, a multi-agent collaboration platform built on FastAPI and LangGraph"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "httpx>=0.27,<1.0",
+    "pydantic-settings>=2.7,<3.0",
+    "pyyaml>=6.0,<7.0",
+    "dishka>=1.5,<2.0",
+    "sqlalchemy[asyncio]>=2.0,<3.0",
+    "aiosqlite>=0.20,<1.0",
+    "alembic>=1.13,<2.0",
+    "langchain-core>=0.3,<2.0",
+    "langchain-openai>=0.3,<2.0",
+    "langgraph>=0.3,<2.0",
+    "jsonschema>=4.23,<5.0",
+    "mcp>=1.29,<1.30",
+    "python-dotenv>=1.0,<2.0",
+    "prompt-toolkit>=3.0,<4.0",
+    "rich>=13.0,<14.0",
+    "autogen-core>=0.7.5",
+    "rank-bm25>=0.2.2,<0.3",
+    "bashlex>=0.18,<1.0",
+]
+
+[project.scripts]
+agentdesk = "cli.__main__:main"
+
+[tool.uv]
+# 国内默认走清华镜像，避免 uv sync/run 直连 pypi.org 超时。CI/海外可用
+# UV_DEFAULT_INDEX 或 --index-url 覆盖。HTTP 超时非配置项，仍用环境变量
+# UV_HTTP_TIMEOUT=180 兜底大依赖(pillow/autogen)下载。
+[[tool.uv.index]]
+name = "tsinghua"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["agent*", "cli*"]
+
+[tool.setuptools.package-data]
+# alembic 迁移脚本随包分发（env.py 无 __init__.py，按数据文件纳入），
+# 运行期由 agent/infrastructure/db/migrations.py 从包内定位。
+"agent.infrastructure.db" = [
+    "alembic_migrations/README",
+    "alembic_migrations/env.py",
+    "alembic_migrations/script.py.mako",
+    "alembic_migrations/versions/*.py",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+# alembic 自动生成的 revision 脚本：长行与 import 顺序由工具决定，不手工整形。
+"agent/infrastructure/db/alembic_migrations/versions/*" = ["E501", "I001"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0,<9.0",
+    "ruff>=0.6,<1.0",
+]

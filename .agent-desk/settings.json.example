@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "mode": "default",
+    "allow": [
+      "read_file(/home/you/projects/src/**)",
+      "read_file(/home/you/projects/docs/**)",
+      "execute_mcp(github)",
+      "bash(git *)"
+    ],
+    "ask": ["edit_file"],
+    "deny": ["bash(rm *)"]
+  },
+  "model": {
+    "qwen3.8-flash": {
+      "name": "Qwen 3.8 Flash",
+      "base_url": "https://api.b.ai/v1",
+      "api_key": "sk-123456",
+      "context_window": 128000,
+      "max_output_tokens": 4096,
+      "request_timeout_seconds": 300
+    }
+  }
+}
