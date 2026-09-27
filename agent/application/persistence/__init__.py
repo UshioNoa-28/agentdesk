@@ -1,0 +1,2 @@
+"""Message persistence application services."""
+
